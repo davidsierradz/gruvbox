@@ -170,6 +170,9 @@ call s:Color('faded_purple',   ['#8f3f71', 96])      " 143-63-113
 call s:Color('faded_aqua',     ['#427b58', 65])      " 66-123-88
 call s:Color('faded_orange',   ['#af3a03', 130])     " 175-58-3
 
+call s:Color('light_comment',  ['#cccccc', 7])
+call s:Color('black_comment',  ['#333333', 8])
+
 " }}}
 " Setup Emphasis: {{{
 
@@ -236,6 +239,8 @@ if s:is_dark
   let s:purple = s:gb.bright_purple
   let s:aqua   = s:gb.bright_aqua
   let s:orange = s:gb.bright_orange
+
+  let s:comment = s:gb.black_comment
 else
   let s:bg0  = s:gb.light0
   if g:gruvbox_contrast_light == 'soft'
@@ -266,6 +271,8 @@ else
   let s:purple = s:gb.faded_purple
   let s:aqua   = s:gb.faded_aqua
   let s:orange = s:gb.faded_orange
+
+  let s:comment = s:gb.light_comment
 endif
 
 " reset to 16 colors fallback
@@ -307,6 +314,7 @@ call s:Color('purple', s:purple)
 call s:Color('aqua',   s:aqua)
 call s:Color('orange', s:orange)
 
+call s:Color('comment', s:comment)
 " }}}
 " Setup Terminal Colors For Neovim: {{{
 
@@ -592,16 +600,16 @@ if version >= 703
   call s:HL('CursorLineNr', s:gb.yellow, s:gb.bg1)
 endif
 
-hi! link NonText GruvboxBg2
+hi! link NonText Comment
 hi! link SpecialKey GruvboxFg4
 
 call s:HL('Visual',    s:none,  s:gb.bg3, s:invert_selection)
 hi! link VisualNOS Visual
 
 call s:HL('Search', s:hls_highlight, s:gb.bg0, s:inverse)
-call s:HL('IncSearch', s:hls_cursor, s:gb.bg0, s:inverse)
+call s:HL('IncSearch', s:gb.bg0, s:hls_cursor, s:bold)
 
-call s:HL('QuickFixLine', s:gb.bg0, s:gb.yellow, s:bold) 
+call s:HL('QuickFixLine', s:gb.bg0, s:gb.yellow, s:bold)
 
 call s:HL('Underlined', s:gb.blue, s:none, s:underline)
 
@@ -661,50 +669,50 @@ hi! link lCursor Cursor
 " Syntax Highlighting: {{{
 
 if g:gruvbox_improved_strings == 0
-  hi! link Special GruvboxOrange
+  call s:HL('Special', s:gb.fg1)
 else
   call s:HL('Special', s:gb.orange, s:gb.bg1, s:italicize_strings)
 endif
 
-call s:HL('Comment', s:gb.gray, s:none, s:italicize_comments)
-call s:HL('Todo', s:vim_fg, s:vim_bg, s:bold . s:italic)
+call s:HL('Comment', s:gb.comment, s:none, s:italicize_comments)
+call s:HL('Todo', s:gb.red, s:vim_bg, s:bold . s:inverse)
 call s:HL('Error', s:gb.red, s:vim_bg, s:bold . s:inverse)
 
 " Generic statement
-hi! link Statement GruvboxRed
+call s:HL('Statement', s:gb.fg1)
 " if, then, else, endif, swicth, etc.
-hi! link Conditional GruvboxRed
+call s:HL('Conditional', s:gb.fg1)
 " for, do, while, etc.
-hi! link Repeat GruvboxRed
+call s:HL('Repeat', s:gb.fg1)
 " case, default, etc.
-hi! link Label GruvboxRed
+call s:HL('Label', s:gb.fg1)
 " try, catch, throw
-hi! link Exception GruvboxRed
+call s:HL('Exception', s:gb.fg1)
 " sizeof, "+", "*", etc.
-hi! link Operator GruvboxFg1
+call s:HL('Operator', s:gb.fg1)
 " Any other keyword
-hi! link Keyword GruvboxRed
+call s:HL('Keyword', s:gb.fg1)
 
 " Variable name
-hi! link Identifier GruvboxBlue
+call s:HL('Identifier', s:gb.fg1)
 " Function name
-hi! link Function GruvboxGreenBold
+call s:HL('Function', s:gb.fg1)
 
 " Generic preprocessor
-hi! link PreProc GruvboxAqua
+call s:HL('PreProc', s:gb.fg1)
 " Preprocessor #include
-hi! link Include GruvboxAqua
+hi! link Include Delimiter
 " Preprocessor #define
-hi! link Define GruvboxAqua
+hi! link Define Delimiter
 " Same as Define
-hi! link Macro GruvboxAqua
+hi! link Macro Delimiter
 " Preprocessor #if, #else, #endif, etc.
-hi! link PreCondit GruvboxAqua
+hi! link PreCondit Delimiter
 
 " Generic constant
-hi! link Constant GruvboxPurple
+call s:HL('Constant', s:gb.fg1)
 " Character constant: 'c', '/n'
-hi! link Character GruvboxPurple
+call s:HL('Character', s:gb.fg1)
 " String constant: "this is a string"
 if g:gruvbox_improved_strings == 0
   call s:HL('String',  s:gb.green, s:none, s:italicize_strings)
@@ -719,9 +727,9 @@ hi! link Number GruvboxPurple
 hi! link Float GruvboxPurple
 
 " Generic type
-hi! link Type GruvboxYellow
+call s:HL('Type', s:gb.fg1)
 " static, register, volatile, etc
-hi! link StorageClass GruvboxOrange
+call s:HL('StorageClass', s:gb.fg1)
 " struct, union, enum, etc.
 hi! link Structure GruvboxAqua
 " typedef
@@ -871,6 +879,7 @@ hi! link GitGutterChangeDelete GruvboxAquaSign
 
 hi! link gitcommitSelectedFile GruvboxGreen
 hi! link gitcommitDiscardedFile GruvboxRed
+hi! link gitcommitBranch Comment
 
 " }}}
 " Signify: {{{
@@ -1032,8 +1041,14 @@ call s:HL('multiple_cursors_visual', s:none, s:gb.bg2)
 
 hi! link CocErrorSign GruvboxRedSign
 hi! link CocWarningSign GruvboxOrangeSign
-hi! link CocInfoSign GruvboxBlueSign
-hi! link CocHintSign GruvboxAquaSign
+hi! link CocInfoSign GruvboxYellowSign
+hi! link CocHintSign GruvboxBlueSign
+
+hi! link CocErrorVirtualText GruvboxRed
+hi! link CocWarningVirtualText GruvboxYellow
+hi! link CocInfoVirtualText GruvboxBlue
+hi! link CocHintVirtualText GruvboxAqua
+
 hi! link CocErrorFloat GruvboxRed
 hi! link CocWarningFloat GruvboxOrange
 hi! link CocInfoFloat GruvboxBlue
@@ -1046,10 +1061,16 @@ hi! link CocDiagnosticsHint GruvboxAqua
 hi! link CocSelectedText GruvboxRed
 hi! link CocCodeLens GruvboxGray
 
-hi! link CocErrorHighlight GruvboxRedUnderline
-hi! link CocWarningHighlight GruvboxOrangeUnderline
-hi! link CocInfoHighlight GruvboxBlueUnderline
-hi! link CocHintHighlight GruvboxAquaUnderline
+call s:HL('CocErrorHighlight', s:gb.bg0, s:gb.red, s:bold)
+call s:HL('CocWarningHighlight', s:gb.bg0, s:gb.yellow, s:bold)
+call s:HL('CocInfoHighlight', s:gb.bg0, s:gb.aqua, s:bold)
+call s:HL('CocHintHighlight', s:gb.bg2, s:gb.purple, s:bold)
+
+call s:HL('CocHighlightText', s:none, s:gb.bg2)
+" }}}
+" Vim Highlightedyank: {{{
+
+hi! link HighlightedyankRegion ErrorMsg
 
 " }}}
 
@@ -1118,8 +1139,6 @@ hi! link xmlEntityPunct GruvboxRed
 " }}}
 " Vim: {{{
 
-call s:HL('vimCommentTitle', s:gb.fg4_256, s:none, s:bold . s:italicize_comments)
-
 hi! link vimNotation GruvboxOrange
 hi! link vimBracket GruvboxOrange
 hi! link vimMapModKey GruvboxOrange
@@ -1127,36 +1146,55 @@ hi! link vimFuncSID GruvboxFg3
 hi! link vimSetSep GruvboxFg3
 hi! link vimSep GruvboxFg3
 hi! link vimContinue GruvboxFg3
+hi! link vimCommentString Comment
+hi! link vimCommentTitle Comment
+hi! link tarFilename Comment
 
 " }}}
 " Clojure: {{{
 
-hi! link clojureKeyword GruvboxBlue
-hi! link clojureCond GruvboxOrange
-hi! link clojureSpecial GruvboxOrange
-hi! link clojureDefine GruvboxOrange
-
-hi! link clojureFunc GruvboxYellow
-hi! link clojureRepeat GruvboxYellow
-hi! link clojureCharacter GruvboxAqua
-hi! link clojureStringEscape GruvboxAqua
-hi! link clojureException GruvboxRed
-
-hi! link clojureRegexp GruvboxAqua
-hi! link clojureRegexpEscape GruvboxAqua
-call s:HL('clojureRegexpCharClass', s:gb.fg3, s:none, s:bold)
-hi! link clojureRegexpMod clojureRegexpCharClass
-hi! link clojureRegexpQuantifier clojureRegexpCharClass
-
-hi! link clojureParen GruvboxFg3
-hi! link clojureAnonArg GruvboxYellow
-hi! link clojureVariable GruvboxBlue
-hi! link clojureMacro GruvboxOrange
-
-hi! link clojureMeta GruvboxYellow
-hi! link clojureDeref GruvboxYellow
-hi! link clojureQuote GruvboxYellow
-hi! link clojureUnquote GruvboxYellow
+call s:HL('clojureConstant', s:gb.fg1)
+hi! link clojureBoolean Boolean
+call s:HL('clojureCharacter', s:gb.fg1)
+call s:HL('clojureKeyword', s:gb.fg1)
+hi! link clojureNumber Number
+hi! link clojureString String
+hi! link clojureStringDelimiter String
+call s:HL('clojureStringEscape', s:gb.fg1)
+call s:HL('clojureRegexp', s:gb.fg1)
+call s:HL('clojureRegexpEscape', s:gb.fg1)
+call s:HL('clojureRegexpCharClass', s:gb.fg1)
+call s:HL('clojureRegexpPosixCharClass', s:gb.fg1)
+call s:HL('clojureRegexpJavaCharClass', s:gb.fg1)
+call s:HL('clojureRegexpUnicodeCharClass', s:gb.fg1)
+call s:HL('clojureRegexpPredefinedCharClass', s:gb.fg1)
+call s:HL('clojureRegexpBoundary', s:gb.fg1)
+call s:HL('clojureRegexpQuantifier', s:gb.fg1)
+call s:HL('clojureRegexpMod', s:gb.fg1)
+call s:HL('clojureRegexpOr', s:gb.fg1)
+call s:HL('clojureRegexpBackRef', s:gb.fg1)
+call s:HL('clojureRegexpGroup', s:gb.fg1)
+call s:HL('clojureRegexpQuoted', s:gb.fg1)
+call s:HL('clojureRegexpQuote', s:gb.fg1)
+call s:HL('clojureVariable', s:gb.fg1)
+call s:HL('clojureCond', s:gb.fg1)
+call s:HL('clojureDefine', s:gb.fg1)
+call s:HL('clojureException', s:gb.fg1)
+call s:HL('clojureFunc', s:gb.fg1)
+call s:HL('clojureMacro', s:gb.fg1)
+call s:HL('clojureRepeat', s:gb.fg1)
+call s:HL('clojureSpecial', s:gb.fg1)
+call s:HL('clojureVarArg', s:gb.fg1)
+call s:HL('clojureQuote', s:gb.fg1)
+call s:HL('clojureUnquote', s:gb.fg1)
+call s:HL('clojureMeta', s:gb.fg1)
+call s:HL('clojureDeref', s:gb.fg1)
+call s:HL('clojureAnonArg', s:gb.fg1)
+call s:HL('clojureDispatch', s:gb.fg1)
+hi! link clojureComment Comment
+hi! link clojureCommentTodo Comment
+call s:HL('clojureError', s:gb.fg1)
+call s:HL('clojureParen', s:gb.fg1)
 
 " }}}
 " C: {{{
@@ -1231,6 +1269,7 @@ hi! link javaScriptMember GruvboxBlue
 hi! link javaScriptNumber GruvboxPurple
 hi! link javaScriptNull GruvboxPurple
 hi! link javaScriptParens GruvboxFg3
+call s:HL('jsDebugger', s:gb.fg1)
 
 " }}}
 " YAJS: {{{
@@ -1256,7 +1295,6 @@ hi! link javascriptCacheMethod GruvboxFg1
 hi! link javascriptDateMethod GruvboxFg1
 hi! link javascriptMathStaticMethod GruvboxFg1
 
-" hi! link javascriptProp GruvboxFg1
 hi! link javascriptURLUtilsProp GruvboxFg1
 hi! link javascriptBOMNavigatorProp GruvboxFg1
 hi! link javascriptDOMDocMethod GruvboxFg1
@@ -1266,14 +1304,9 @@ hi! link javascriptBOMWindowMethod GruvboxFg1
 hi! link javascriptStringMethod GruvboxFg1
 
 hi! link javascriptVariable GruvboxOrange
-" hi! link javascriptVariable GruvboxRed
-" hi! link javascriptIdentifier GruvboxOrange
-" hi! link javascriptClassSuper GruvboxOrange
 hi! link javascriptIdentifier GruvboxOrange
 hi! link javascriptClassSuper GruvboxOrange
 
-" hi! link javascriptFuncKeyword GruvboxOrange
-" hi! link javascriptAsyncFunc GruvboxOrange
 hi! link javascriptFuncKeyword GruvboxAqua
 hi! link javascriptAsyncFunc GruvboxAqua
 hi! link javascriptClassStatic GruvboxOrange
@@ -1287,9 +1320,6 @@ hi! link javascriptMessage GruvboxRed
 hi! link javascriptTemplateSB GruvboxAqua
 hi! link javascriptTemplateSubstitution GruvboxFg1
 
-" hi! link javascriptLabel GruvboxBlue
-" hi! link javascriptObjectLabel GruvboxBlue
-" hi! link javascriptPropertyName GruvboxBlue
 hi! link javascriptLabel GruvboxFg1
 hi! link javascriptObjectLabel GruvboxFg1
 hi! link javascriptPropertyName GruvboxFg1
@@ -1322,8 +1352,8 @@ hi! link jsExportDefault GruvboxAqua
 hi! link jsTemplateBraces GruvboxAqua
 hi! link jsGlobalNodeObjects GruvboxBlue
 hi! link jsGlobalObjects GruvboxBlue
-hi! link jsObjectKey GruvboxGreenBold
-hi! link jsFunction GruvboxAqua
+call s:HL('jsObjectKey', s:gb.fg1)
+call s:HL('jsFunction', s:gb.fg1)
 hi! link jsFuncCall GruvboxBlue
 hi! link jsFuncParens GruvboxFg3
 hi! link jsParens GruvboxFg3
@@ -1335,9 +1365,9 @@ hi! link jsOperatorKeyword GruvboxRed
 " }}}
 " TypeScript: {{{
 
-hi! link typescriptReserved GruvboxAqua
-hi! link typescriptLabel GruvboxAqua
-hi! link typescriptFuncKeyword GruvboxAqua
+call s:HL('typescriptReserved', s:gb.fg1)
+call s:HL('typescriptLabel', s:gb.fg1)
+call s:HL('typescriptFuncKeyword', s:gb.fg1)
 hi! link typescriptIdentifier GruvboxOrange
 hi! link typescriptBraces GruvboxFg1
 hi! link typescriptEndColons GruvboxFg1
@@ -1533,7 +1563,7 @@ hi! link haskellAssocType GruvboxAqua
 
 hi! link haskellNumber GruvboxAqua
 hi! link haskellPragma GruvboxRedBold
- 
+
 hi! link haskellTH GruvboxAquaBold
 hi! link haskellForeignKeywords GruvboxGreen
 hi! link haskellKeyword GruvboxRed
@@ -1567,7 +1597,7 @@ hi! link mailHeaderKey GruvBoxBlue
 hi! link mailHeaderEmail GruvBoxBlue
 hi! link mailSubject GruvboxBlue
 
-" mail quoted text 
+" mail quoted text
 hi! link mailQuoted1 GruvBoxAqua
 hi! link mailQuoted2 GruvBoxPurple
 hi! link mailQuoted3 GruvBoxYellow
@@ -1585,10 +1615,10 @@ hi! link mailQuotedExp6 GruvBoxOrange
 " I did not discover yet for what this is used
 " hi! link mailVerbatim GruvBoxRed
 
-" mail signature 
-hi! link mailSignature GruvBoxFg 
+" mail signature
+hi! link mailSignature GruvBoxFg
 
-" mail url and emails 
+" mail url and emails
 hi! link mailURL GruvBoxOrange
 hi! link mailEmail GruvBoxOrange
 
@@ -1627,7 +1657,40 @@ hi! link ocamlInfixOpKeyword GruvboxRed
 hi! link ocamlConstructor GruvboxOrange
 
 " }}}
+" jsDoc: {{{
 
+hi! link jsDocBraces Comment
+hi! link jsDocTags Comment
+hi! link jsDocAccessTypes Comment
+hi! link jsDocAuthorName Comment
+hi! link jsDocAuthorMail Comment
+hi! link jsDocImportant Comment
+hi! link jsDocValue Comment
+hi! link jsDocCaption Comment
+hi! link jsDocCaptionTag Comment
+hi! link jsDocKinds Comment
+hi! link jsDocExampleBoundary Comment
+hi! link jsDocNamepath Comment
+hi! link jsDocIdentifier Comment
+hi! link jsDocModuleName Comment
+hi! link jsDocEvent Comment
+hi! link jsDocAngleBrackets Comment
+hi! link jsDocHyphen Comment
+hi! link jsDocTagsInline Comment
+hi! link jsDocLinkPath Comment
+hi! link jsDocLinkSeparator Comment
+hi! link jsDocLinkText Comment
+hi! link jsDocAs Comment
+hi! link jsDocType Comment
+hi! link jsDocTypeBlock Comment
+hi! link jsDocReturnTypeBlock Comment
+
+" }}}
+" Scheme: {{{
+
+call s:HL('schemeParentheses', s:gb.fg1)
+
+" }}}
 
 " Functions -------------------------------------------------------------------
 " Search Highlighting Cursor {{{
